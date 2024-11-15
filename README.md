@@ -10,9 +10,7 @@ The repository is organized as follows:
   * [Data Processing](#data-processing)
   * [Training](#training)
   * [Sampling and Evaluation](#sampling-and-evaluation)
-
-## Overview
-NexTune is a PyTorch-based implementation of a conditional song generation model for future seconds music prediction. It leverages denoising diffusion models. 
+ 
 
 ## Documentation
 * The diffusion process is modified from OpenAI's diffusion repos: [GLIDE](https://github.com/openai/glide-text2im/blob/main/glide_text2im/gaussian_diffusion.py), [ADM](https://github.com/openai/guided-diffusion/blob/main/guided_diffusion), and [IDDPM](https://github.com/openai/improved-diffusion/blob/main/improved_diffusion/gaussian_diffusion.py).
@@ -62,7 +60,15 @@ pip install -r requirements.txt
 ```
 
 ## Data Processing
+To launch data pre-processing:
+```bash
+python -m scripts.preprocess --config configs/config_process.yaml
+```
 
+To launch data post-processing:
+```bash
+python -m scripts.postprocess --config configs/config_process.yaml
+```
 
 ## Training
 We provide a training script for NexTune model in [`scripts/train.py`](scripts/train.py).

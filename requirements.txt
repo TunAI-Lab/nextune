@@ -10,3 +10,5 @@ timm
 diffusers
 accelerate
 fvcore
+librosa
+ffmpeg
