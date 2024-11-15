@@ -1,20 +1,20 @@
 # TODO List
 
 
-## Features
-- [x]
-- [] 
+### Features
+- [ ] Add data preprocessing script for transforming audio samples from temporal to frequency domain.
+- [ ] Adapt backbone architetcure to the new data shape. 
+- [ ] Update train and sample scripts accordingly following the previous feature.
 
 
-## Bugs
+### Bugs
 
 
-## Enhancements
+### Enhancements
 
 
-## Conclusions
+### Conclusions
 
 
-## Data Processing Notes
-
+### Data Processing Notes
 
