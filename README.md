@@ -60,7 +60,7 @@ pip install -r requirements.txt
 ```
 
 ## Data Processing
-To launch data pre-processing:
+To launch data pre-processing :
 ```bash
 python -m scripts.preprocess --config configs/config_process.yaml
 ```
