@@ -27,3 +27,9 @@ Example Workflow for Spectrogram-Based Diffusion:
 - Normalize each spectrogram to a suitable range (e.g., [-1, 1] or [0, 1]) for model input. You can also standardize and then scale.
 - Train the Diffusion Model to predict future spectrogram frames based on the given history.
 - Invert the generated spectrograms back to the waveform domain using an inverse STFT or a neural vocoder.
+
+Rule of Thumb: A hop length of 512 samples (for a 1024-sample window) is a good starting point, especially for music.
+
+Sampling Rate Consideration:
+- For audio at a standard sampling rate of 44.1 kHz or 48 kHz, a window size of 1024 samples and hop length of 512 samples works well for most music genres.
+- If your audio is at a lower sample rate (e.g., 16 kHz), you may consider smaller values like window size = 512 and hop length = 256.
