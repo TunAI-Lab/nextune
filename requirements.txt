@@ -11,4 +11,5 @@ diffusers
 accelerate
 fvcore
 librosa
+
 ffmpeg
