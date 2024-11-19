@@ -4,10 +4,12 @@ data:
   mp3_dir: "data_mp3"
 
 process:
-  sample_rate: 24000           # Audio sample rate. Choose between {24000, 44100, 48000}.
-                               # If 24000 choose n_fft 512 and hop length 256, else n_fft 1024.
-  n_mels: 128                  # Number of mel bands. 64 for simpler tasks. 128 for moderate resolution. 256 for higher resolution.
-  chunk_seconds: 15            # Length of audio chunk in seconds (15 for history nd 5 for future)
-  hop_length: 384              # Hop length for STFT. Define how much the window moves with each step.
-                               # Choose (n_fft*3)//4 if 25% overlap, n_fft//2 if 50% overlap, and n_fft//4 if 75% overlap.
-  n_fft: 512                   # Window size for STFT (default to 1024 or 2048 for music or continuous sounds)
+  sample_rate: 48000          # Audio sample rate. Choose between {24000, 44100, 48000},
+                              # if 24000 choose n_fft 512 and hop length 256, else n_fft 1024.
+  n_mels: 256                 # Number of mel bands. 64 for simpler tasks. 128 for moderate resolution. 256 for higher resolution.
+                              #
+  chunk_seconds: 15           # Length of audio chunk in seconds (15 for history nd 5 for future)
+                              #  
+  hop_length: 512             # Hop length for STFT. Define how much the window moves with each step,
+                              # choose (n_fft*3)//4 if 25% overlap, n_fft//2 if 50% overlap, and n_fft//4 if 75% overlap.
+  n_fft: 2048                 # Window size for STFT (default to 1024 or 2048 for music or continuous sounds)
