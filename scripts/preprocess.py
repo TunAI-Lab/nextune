@@ -19,7 +19,7 @@ def preprocess_audio(file_path, target_dir, sample_rate,
                      chunk_seconds, n_mels, hop_length, n_fft):
     # Load audio file
     # Define sr=None to determine the original audio sr
-    audio, sr = librosa.load(file_path, sr=sample_rate)    
+    audio, sr = librosa.load(file_path, sr=sample_rate)
     #print(f'audio original sample_rate: {sr}')    
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     
