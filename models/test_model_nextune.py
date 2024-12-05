@@ -7,7 +7,7 @@ from diffusion import create_diffusion
 
 
 # Test setup
-model_name = 'NexTune-S'
+model_name = 'NexTune-L'
 batch_size = 1
 hist_length = 469
 seq_length = 469
