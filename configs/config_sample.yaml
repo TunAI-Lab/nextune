@@ -1,5 +1,7 @@
 data:
-  test_dir: "/path/to/test/dir"
+  test_dir: "/path/to/data/test"
+  subset_size: 15
+  stats_file: "/path/to/data/stats.npz"
 
 sample:
   num_sampling: 100

@@ -1,7 +1,7 @@
 data:
-  raw_dir: "data"
-  prep_dir: "data_prep"       # Preprocessed data shape (256, 938)
-  mp3_dir: "data_mp3"
+  raw_dir: "data/raw"
+  prep_dir: "data/prep"       # Preprocessed data shape (256, 938)
+  mp3_dir: "data/mp3"
 
 process:
   sample_rate: 48000          # Audio sample rate. Choose between {24000, 44100, 48000},
