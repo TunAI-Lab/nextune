@@ -1,8 +1,5 @@
-import torch
-from torch.utils.data import Dataset, DataLoader, Subset
-import torchvision.transforms as T
+
 import os
-import sys
 import argparse
 import logging
 from glob import glob
@@ -10,6 +7,11 @@ from time import time
 import importlib
 import yaml
 import numpy as np
+
+import torch
+from torch.utils.data import Dataset, DataLoader, Subset
+import torchvision.transforms as T
+
 from accelerate import Accelerator
 from diffusion import create_diffusion
 
@@ -57,12 +59,10 @@ def get_subset_loader(dataset, subset_size):
 #                                Dataset                                        #
 #################################################################################
 class CustomDataset(Dataset):
-    def __init__(self, data_path, max_agent, hist_length, seq_length, dim_size):
+    def __init__(self, data_path, hist_length, seq_length, n_mels):
         self.data_path = data_path
-        self.max_agent = max_agent
-        self.hist_length = hist_length
-        self.seq_length = seq_length
-        self.dim_size = dim_size   
+        self.length = hist_length + seq_length
+        self.n_mels = n_mels   
         self.data_files = sorted(os.listdir(data_path))
 
     def __len__(self):
@@ -71,9 +71,8 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):      
         data_file = self.data_files[idx]
         data_npy = np.load(os.path.join(self.data_path, data_file))
-        data_npy = data_npy[:self.max_agent, :, :self.dim_size]
         data_tensor = torch.tensor(data_npy, dtype=torch.float32)
-        assert data_tensor.shape == (self.max_agent, self.hist_length + self.seq_length, self.dim_size), \
+        assert data_tensor.shape == (self.n_mels, self.length), \
             f"Unexpected shape {data_tensor.shape} at index {idx}"
         return data_tensor
 
@@ -94,10 +93,9 @@ def main(config):
     device = accelerator.device
     
     # Initialize var from config file
-    max_num_agents=config['model']['max_num_agents']
     seq_length=config['model']['seq_length']
     hist_length=config['model']['hist_length']
-    dim_size=config['model']['dim_size']
+    n_mels=config['model']['n_mels']
     model_name = config['model']['name']
     results_dir = config['train']['results_dir']
     
@@ -114,10 +112,9 @@ def main(config):
     # Setup Dataloader
     dataset = CustomDataset(
         data_path=config['data']['train_dir'],
-        max_agent=max_num_agents,
         hist_length=hist_length,
         seq_length=seq_length,
-        dim_size=dim_size,
+        n_mels=n_mels,
     )
     dataset = get_subset_loader(dataset, subset_size=config['data']['subset_size'])
     loader = DataLoader(
@@ -135,12 +132,9 @@ def main(config):
     # Note that parameter initialization is done within the model constructor
     model_class = load_model(config['model']['module'], config['model']['class'])
     model = model_class[model_name](
-        max_num_agents=max_num_agents,
         seq_length=seq_length,
         hist_length=hist_length,
-        dim_size=dim_size,
-        map_channels=config['model']['map_channels'],
-        use_map_embed=config['model']['use_map_embed'],
+        n_mels=n_mels,
         use_ckpt_wrapper=config['model']['use_ckpt_wrapper'],
     ).to(device)
     
