@@ -9,9 +9,9 @@ from diffusion import create_diffusion
 # Test setup
 model_name = 'NexTune-S'
 batch_size = 1
-hist_length = 
-seq_length = 
-n_mels = 
+hist_length = 469
+seq_length = 469
+n_mels = 256
 use_ckpt_wrapper = False
 
 num_sampling_steps = 100
