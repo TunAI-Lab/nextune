@@ -101,7 +101,7 @@ class NexTune(nn.Module):
             AdaTransformerEnc(hidden_size, num_heads, mlp_ratio=mlp_ratio) for _ in range(depth)
         ])
         
-        self.final_layer = FinalLayer(n_mels, hidden_size)    
+        self.final_layer = FinalLayer(hidden_size, n_mels)    
         self.hist_length = hist_length
         self.use_ckpt_wrapper = use_ckpt_wrapper
         self.initialize_weights()
@@ -139,9 +139,9 @@ class NexTune(nn.Module):
     def forward(self, x, t, h):
         """
         Forward pass of NexTune.
-        - x: (B, N, L_x) tensor of future audio chunk where N:n_mels, L_x:sequence_length
+        - x: (B, N, L_x) tensor of future audio chunk where N:n_mels, L_x:seq_length
         - t: (B,) tensor of diffusion timesteps     
-        - h: (B, N, L_h) tensor of history audio chunk where N:n_mels, L_h:history_length
+        - h: (B, N, L_h) tensor of history audio chunk where N:n_mels, L_h:hist_length
         """
         
         ##################### Cat and Proj ##########################

@@ -1,7 +1,7 @@
 import torch
 import time
 from fvcore.nn import FlopCountAnalysis
-from backbones.model_nextune import NexTune_models
+from models.backbones.model_nextune import NexTune_models
 from fvcore.nn import FlopCountAnalysis
 from diffusion import create_diffusion
 
