@@ -182,13 +182,13 @@ class NexTune(nn.Module):
 #                               NexTune Configs                                 #
 #################################################################################
 def NexTune_L(**kwargs):
-    return NexTune(hidden_size=1024, num_heads=16, depth=24, **kwargs)
+    return NexTune(hidden_size=768, num_heads=16, depth=24, **kwargs)
 
 def NexTune_B(**kwargs):
-    return NexTune(hidden_size=768, num_heads=12, depth=22, **kwargs)
+    return NexTune(hidden_size=512, num_heads=8, depth=16, **kwargs)
 
 def NexTune_S(**kwargs):
-    return NexTune(hidden_size=512, num_heads=8, depth=16, **kwargs)
+    return NexTune(hidden_size=384, num_heads=4, depth=8, **kwargs)
 
 NexTune_models = {
     'NexTune-L': NexTune_L,
