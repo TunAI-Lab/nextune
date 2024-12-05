@@ -1,6 +1,6 @@
 data:
   raw_dir: "data"
-  prep_dir: "data_prep"
+  prep_dir: "data_prep"       # Preprocessed data shape (256, 938)
   mp3_dir: "data_mp3"
 
 process:
@@ -8,7 +8,7 @@ process:
                               # if 24000 choose n_fft 512 and hop length 256, else n_fft 1024.
   n_mels: 256                 # Number of mel bands. 64 for simpler tasks. 128 for moderate resolution. 256 for higher resolution.
                               #
-  chunk_seconds: 15           # Length of audio chunk in seconds (15 for history nd 5 for future)
+  chunk_seconds: 10           # Length of audio chunk in seconds
                               #  
   hop_length: 512             # Hop length for STFT. Define how much the window moves with each step,
                               # choose (n_fft*3)//4 if 25% overlap, n_fft//2 if 50% overlap, and n_fft//4 if 75% overlap.
