@@ -3,8 +3,10 @@
 
 ### Features
 - [x] Add data preprocessing script for transforming audio samples from temporal to frequency domain.
-- [ ] Adapt backbone architetcure to the new data shape. 
-- [ ] Update train and sample scripts accordingly following the previous feature.
+- [x] Adapt backbone architetcure to the new data shape. 
+- [x] Update train and sample scripts accordingly following the previous feature.
+- [ ] verify if train and sampling works well
+- [ ] update postprocess script to leverage nd array of data_gen
 
 
 ### Bugs
