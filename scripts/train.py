@@ -175,8 +175,8 @@ def main(config):
         if accelerator.is_main_process:
             logger.info(f"Beginning epoch {epoch}...")
         for data in loader:
-            x = data[:, :, hist_length:, :].to(device)
-            h = data[:, :, :hist_length, :].to(device)
+            x = data[:, :, hist_length:].to(device)
+            h = data[:, :, :hist_length].to(device)
             model_kwargs = dict(h=h)
             t = torch.randint(0, diffusion.num_timesteps, (x.shape[0],), device=device)
             loss_dict = diffusion.training_losses(model, x, t, model_kwargs)
