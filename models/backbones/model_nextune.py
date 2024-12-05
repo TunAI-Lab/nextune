@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from models.backbones.layers import modulate, AdaTransformer
+from models.backbones.layers import modulate, AdaTransformerEnc
 
 
 
@@ -50,31 +50,28 @@ class TimestepEmbedder(nn.Module):
 
 
 #################################################################################
-#                       Core NexTune Model                              #
+#                           Core NexTune Model                                  #
 #################################################################################
 class FinalLayer(nn.Module):
     """
     The final layer of the NexTune
     Used for adaLN, project x the to desired output size.
     """
-    def __init__(self, max_num_agents, seq_length, dim_size, hidden_size):
+    def __init__(self, hidden_size, n_mels):
         super().__init__()
-        self.max_num_agents = max_num_agents
-        self.seq_length = seq_length
-        self.dim_size = dim_size
-        self.norm_final = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6)
-        self.linear = nn.Linear(hidden_size, dim_size, bias=True)
         self.adaLN_modulation = nn.Sequential(
             nn.SiLU(),
             nn.Linear(hidden_size, 2 * hidden_size, bias=True)
         )
+        self.norm = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6)
+        self.proj = nn.Linear(hidden_size, n_mels, bias=True)
 
     def forward(self, x, c):
-        # (B*N, L, H), (B*N, H)
-        shift, scale = self.adaLN_modulation(c).chunk(2, dim=1)                 # (B*N, H), (B*N, H)
-        x = modulate(self.norm_final(x), shift, scale)                          # (B*N, L, H)
-        x = self.linear(x)                                                      # (B*N, L, D)
-        x = x.reshape(-1, self.max_num_agents, self.seq_length, self.dim_size)  # (B, N, L, D)
+        # (B, L, H), (B, H)
+        shift, scale = self.adaLN_modulation(c).chunk(2, dim=1)      # (B, H), (B, H)
+        x = modulate(self.norm(x), shift, scale)                     # (B, L, H)
+        x = self.proj(x)                                             # (B, L, N)
+        x = x.permute(0, 2, 1)                                       # (B, N, L)
         return x
     
 class NexTune(nn.Module):
@@ -83,10 +80,9 @@ class NexTune(nn.Module):
     """
     def __init__(
         self,
-        max_num_agents,
         seq_length,
         hist_length,
-        dim_size,
+        n_mels,
         use_ckpt_wrapper,
         hidden_size,
         num_heads,
@@ -95,14 +91,17 @@ class NexTune(nn.Module):
     ):
         super().__init__()
         self.t_embedder = TimestepEmbedder(hidden_size)         
-        self.proj1 = nn.Linear(dim_size, hidden_size, bias=True)
+        self.proj = nn.Linear(n_mels, hidden_size, bias=True)
         
-        self.t_pos_embed = nn.Parameter(torch.zeros(1, hist_length+seq_length, hidden_size), requires_grad=True)
+        self.t_pos_embed = nn.Parameter(
+            torch.zeros(1, hist_length+seq_length, hidden_size),
+            requires_grad=True,
+        )
         self.t_blocks = nn.ModuleList([
-            AdaTransformer(hidden_size, num_heads, mlp_ratio=mlp_ratio) for _ in range(depth)
+            AdaTransformerEnc(hidden_size, num_heads, mlp_ratio=mlp_ratio) for _ in range(depth)
         ])
         
-        self.final_layer = FinalLayer(max_num_agents, hist_length+seq_length, dim_size, hidden_size)    
+        self.final_layer = FinalLayer(n_mels, hidden_size)    
         self.hist_length = hist_length
         self.use_ckpt_wrapper = use_ckpt_wrapper
         self.initialize_weights()
@@ -128,8 +127,8 @@ class NexTune(nn.Module):
         # Zero-out output layers:
         nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)
         nn.init.constant_(self.final_layer.adaLN_modulation[-1].bias, 0)
-        nn.init.constant_(self.final_layer.linear.weight, 0)
-        nn.init.constant_(self.final_layer.linear.bias, 0)
+        nn.init.constant_(self.final_layer.proj.weight, 0)
+        nn.init.constant_(self.final_layer.proj.bias, 0)
     
     def ckpt_wrapper(self, module):
         def ckpt_forward(*inputs):
@@ -142,15 +141,14 @@ class NexTune(nn.Module):
         Forward pass of NexTune.
         - x: (B, N, L_x) tensor of future audio chunk where N:n_mels, L_x:sequence_length
         - t: (B,) tensor of diffusion timesteps     
-        - h: (B, N, L_h) tensor of history agents where N:max_num_agents, L_h:hist_sequence_length
+        - h: (B, N, L_h) tensor of history audio chunk where N:n_mels, L_h:history_length
         """
         
         ##################### Cat and Proj ##########################
         # (B, N, L_x), (B, N, L_h)
         x = torch.cat((h, x), dim=2)                    # (B, N, L)
         x = x.permute(0, 2, 1)                          # (B, L, N)
-        x = self.proj1(x)                               # (B, L, H)
-        B, L, H = x.shape[0], x.shape[1], x.shape[2]
+        x = self.proj(x)                                # (B, L, H)
         #############################################################
         
         ###################### Embedders ############################
@@ -163,7 +161,10 @@ class NexTune(nn.Module):
         x = x + self.t_pos_embed                        # (B, L, H)
         if self.use_ckpt_wrapper:
             for block in self.t_blocks:
-                x = torch.utils.checkpoint.checkpoint(self.ckpt_wrapper(block), x, c, use_reentrant=False)
+                x = torch.utils.checkpoint.checkpoint(
+                    self.ckpt_wrapper(block),
+                    x, c, use_reentrant=False,
+                )                                       # (B, L, H)
         else:
             for block in self.t_blocks:
                 x = block(x, c)                         # (B, L, H)
@@ -178,9 +179,8 @@ class NexTune(nn.Module):
 
 
 #################################################################################
-#                          NexTune Configs                              #
+#                               NexTune Configs                                 #
 #################################################################################
-
 def NexTune_L(**kwargs):
     return NexTune(hidden_size=1024, num_heads=16, depth=24, **kwargs)
 

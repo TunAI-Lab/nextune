@@ -13,9 +13,9 @@ def modulate(x, shift, scale):
     return x * (1 + scale.unsqueeze(1)) + shift.unsqueeze(1)   # (B, N, H) 
     
     
-class AdaTransformer(nn.Module):
+class AdaTransformerEnc(nn.Module):
     """
-    A Transformer block with adaptive layer norm zero (adaLN-Zero) conditioning
+    A Transformer encoder block with adaptive layer norm zero (adaLN-Zero) conditioning
     """
     def __init__(self, hidden_size, num_heads, mlp_ratio=4.0):
         super().__init__()
@@ -32,12 +32,12 @@ class AdaTransformer(nn.Module):
         )
 
     def forward(self, x, c):
-        # [(B, N, H), (B, H)]
+        # [(B, L, H), (B, H)]
         shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.adaLN_modulation(c).chunk(6, dim=1)
         # Attention
-        x = x + gate_msa.unsqueeze(1) * self.attn(modulate(self.norm1(x), shift_msa, scale_msa))   # (B, N, H)
+        x = x + gate_msa.unsqueeze(1) * self.attn(modulate(self.norm1(x), shift_msa, scale_msa))   # (B, L, H)
         # Mlp/Gmlp
-        x = x + gate_mlp.unsqueeze(1) * self.mlp(modulate(self.norm2(x), shift_mlp, scale_mlp))    # (B, N, H)
+        x = x + gate_mlp.unsqueeze(1) * self.mlp(modulate(self.norm2(x), shift_mlp, scale_mlp))    # (B, L, H)
         return x
 
 class Attention(nn.Module):    
