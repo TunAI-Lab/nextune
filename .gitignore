@@ -1,0 +1,17 @@
+# Ignore gitignore and todo list
+#.gitignore
+#TODO.md
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore screen logs
+logs
+
+# Ignore no push dir
+other
+
+# Ignore results and data directories
+results
+data*
