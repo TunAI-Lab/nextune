@@ -19,6 +19,7 @@ The repository is organized as follows:
 ``` 
 nextune-main/
 ├── configs/                           # Configuration files for training/sampling
+│     ├── config_process.yaml          # Audio pre/post-processing configurations
 │     ├── config_sample.yaml           # Sampling-specific configurations
 │     └── config_train.yaml            # Training-specific configurations
 ├── diffusion/                         # Core diffusion modules
@@ -27,10 +28,12 @@ nextune-main/
 │     └── README.md                    # Documentation overview and usage guide
 ├── models/                            # Model and architecture components
 │     ├── backbones/                   # Backbone networks for NexTune
-│     │   ├── model_td.py              # NexTune backbone model
+│     │   ├── model_nextune.py         # NexTune backbone model
 │     │   └── layers.py                # Custom layers and utility functions
-│     └── test_model_td.py             # Test model_td backbone efficiency
+│     └── test_model_nextune.py        # Test model_td backbone efficiency
 ├── scripts/                           # Scripts for running tasks
+│     ├── preprocess.py                # Audio pre-processing script
+│     ├── postprocess.py               # Audio post-processing script
 │     ├── sample.py                    # Sampling script
 │     └── train.py                     # Training script
 ├── utils/                             # Utility functions and helper scripts
