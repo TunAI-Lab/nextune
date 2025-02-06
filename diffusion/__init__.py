@@ -18,6 +18,7 @@ def create_diffusion(
     diffusion_steps=1000
 ):
     betas = gd.get_named_beta_schedule(noise_schedule, diffusion_steps)
+    #betas = np.linspace(1e-4, 0.05, 50).tolist()
     if use_kl:
         loss_type = gd.LossType.RESCALED_KL
     elif rescale_learned_sigmas:
